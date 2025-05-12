@@ -1,5 +1,6 @@
 using FFXIVClientStructs.FFXIV.Client.Game;
 using FFXIVClientStructs.FFXIV.Client.System.String;
+using FFXIVClientStructs.FFXIV.Client.UI.Info;
 using static FFXIVClientStructs.FFXIV.Common.Configuration.ConfigBase;
 
 namespace FFXIVClientStructs.FFXIV.Client.UI.Agent;
@@ -13,7 +14,8 @@ namespace FFXIVClientStructs.FFXIV.Client.UI.Agent;
 [Inherits<AgentInterface>, Inherits<ChangeEventInterface>]
 [StructLayout(LayoutKind.Explicit, Size = 0x3880)]
 public unsafe partial struct AgentItemSearch {
-    [FieldOffset(0x98)] public StringHolder* StringData;
+    [FieldOffset(0x98)] public InfoProxyCatalogSearch* InfoProxyCatalogSearch;
+    [FieldOffset(0x98)] public StringHolder* StringData; // Actually a pointer to InfoProxyCatalogSearch
     // [FieldOffset(0xA2C), FixedSizeArray] internal FixedSizeArray100<uint> _unkUints;
     [FieldOffset(0xA29)] public bool ListingPageLoaded;
     [FieldOffset(0xBBC), FixedSizeArray] internal FixedSizeArray100<uint> _listingPageItemIds;
@@ -29,9 +31,9 @@ public unsafe partial struct AgentItemSearch {
     [FieldOffset(0x338C)] public uint ResultSelectedIndex;
     [FieldOffset(0x3398)] public InventoryItem ResultHoveredItem;
 
-    [FieldOffset(0x3688)] public bool ItemSearchResult_DisplayOnlyHQ;
-    [FieldOffset(0x3689)] public byte ItemSearchResult_OrnateMateriaAffixedCount; // 0-5
-    [FieldOffset(0x368A)] public bool ItemSearchResult_HideSetsForSale;
+    [FieldOffset(0x3688)] public bool ResultFilterDisplayOnlyHQ;
+    [FieldOffset(0x3689)] public byte ResultFilterMateriaAffixedCount; // 0-5
+    [FieldOffset(0x368A)] public bool ResultFilterHideSetsForSale;
 
     // [FieldOffset(0x3768)] public int SortingDropdownCount;
 
