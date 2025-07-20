@@ -376,6 +376,14 @@ public class Exporter {
                 FieldTypeOverride = $"Component::Exd::Sheets::{sheetName}*"
             };
         }
+        if (field.GetCustomAttribute<CExporterTypeForceAttribute>() != null) {
+            return new ProcessedField {
+                FieldType = field.FieldType,
+                FieldOffset = field.GetFieldOffset() - offset,
+                FieldName = field.Name,
+                FieldTypeOverride = field.GetCustomAttribute<CExporterTypeForceAttribute>()!.TypeName
+            };
+        }
         _processType.Add(field.FieldType);
         return new ProcessedField {
             FieldType = field.FieldType,
@@ -405,6 +413,14 @@ public class Exporter {
                 FieldTypeOverride = $"Component::Exd::Sheets::{sheetName}*"
             };
         }
+        if (parameter.GetCustomAttribute<CExporterTypeForceAttribute>() != null) {
+            return new ProcessedField {
+                FieldType = parameter.ParameterType,
+                FieldOffset = -1,
+                FieldName = parameter.Name!,
+                FieldTypeOverride = parameter.GetCustomAttribute<CExporterTypeForceAttribute>()!.TypeName
+            };
+        }
         _processType.Add(parameter.ParameterType);
         return new ProcessedField {
             FieldType = parameter.ParameterType,
@@ -431,6 +447,14 @@ public class Exporter {
                 FieldOffset = -1,
                 FieldName = i == 0 ? "this" : parameters?[i - 1].Name ?? $"a{i + 1}",
                 FieldTypeOverride = $"Component::Exd::Sheets::{sheetName}*"
+            };
+        }
+        if (i != 0 && parameters?[i - 1] is not null && parameters[i - 1].GetCustomAttribute<CExporterTypeForceAttribute>() != null) {
+            return new ProcessedField {
+                FieldType = parameter,
+                FieldOffset = -1,
+                FieldName = parameters[i - 1].Name ?? $"a{i + 1}",
+                FieldTypeOverride = parameters[i - 1].GetCustomAttribute<CExporterTypeForceAttribute>()!.TypeName
             };
         }
         _processType.Add(parameter);
@@ -471,12 +495,14 @@ public class Exporter {
             if (!type.IsStruct() || type.IsEnum) return null;
             if (type.IsInStructList(_structs) || (overrideType?.IsInStructList(_structs) ?? false)) return null;
             var vtable = type.GetField("VirtualTable", ExporterStatics.BindingFlags)?.FieldType;
+            var vtableSize = 0;
             ProcessedVirtualFunction[]? virtualFunctions = null;
             if (vtable != null) {
                 vtable = vtable.GetElementType()!;
-                var memberFunctions = type.GetMethods(ExporterStatics.BindingFlags).Where(t => t.GetCustomAttribute<VirtualFunctionAttribute>() != null).Select(t => Tuple.Create(t.Name, t.GetParameters(), t.ReturnType)).ToArray();
+                var memberFunctions = type.GetMethods(ExporterStatics.BindingFlags).Select(t => Tuple.Create(t.Name, t.GetParameters(), t.ReturnType)).ToArray();
                 virtualFunctions = vtable.GetFields(ExporterStatics.BindingFlags).Where(t => t.GetCustomAttribute<ObsoleteAttribute>() == null && t.GetCustomAttribute<CExportIgnoreAttribute>() == null).Select(f => {
-                    var memberFunction = memberFunctions.FirstOrDefault(t => t.Item1 == f.Name);
+                    var parameterTypes = f.FieldType.GetFunctionPointerParameterTypes();
+                    var memberFunction = memberFunctions.FirstOrDefault(t => t.Item1 == f.Name && t.Item2.Length == parameterTypes.Length - 1);
                     var returnType = f.FieldType.GetFunctionPointerReturnType();
                     if (memberFunction?.Item3 != returnType) memberFunction = null;
                     _processType.Add(f.FieldType.GetFunctionPointerReturnType());
@@ -484,9 +510,10 @@ public class Exporter {
                         VirtualFunctionName = f.Name,
                         Offset = f.GetFieldOffset(),
                         VirtualFunctionReturnType = f.FieldType.GetFunctionPointerReturnType(),
-                        VirtualFunctionParameters = f.FieldType.GetFunctionPointerParameterTypes().Select((p, i) => ProcessVirtualParameter(p, i, memberFunction?.Item2)).ToArray()
+                        VirtualFunctionParameters = parameterTypes.Select((p, i) => ProcessVirtualParameter(p, i, memberFunction?.Item2)).ToArray()
                     };
                 }).ToArray();
+                vtableSize = vtable.StructLayoutAttribute?.Size ?? vtableSize;
             }
 
             var memberFunctionClass = type.GetMember("MemberFunctionPointers", ExporterStatics.BindingFlags).FirstOrDefault()?.DeclaringType;
@@ -544,6 +571,7 @@ public class Exporter {
                             StructNamespace = type.FullSanitizeName() + (attr.IsStruct ? $"{ExporterStatics.Separator}{attr.Union}" : ""),
                             StructTypeName = type.FullSanitizeName() + $"{ExporterStatics.Separator}{attr.Union}{(attr.IsStruct ? $"{ExporterStatics.Separator}{attr.Struct}" : "")}",
                             StructSize = 0,
+                            VirtualFunctionSize = 0,
                             Fields = [
                                 ProcessField(unionField, unionStartField.GetFieldOffset())
                             ],
@@ -588,6 +616,7 @@ public class Exporter {
                 StructNamespace = type.GetNamespace(),
                 StructTypeName = overrideType ?? type.FullSanitizeName(),
                 StructSize = type.SizeOf(),
+                VirtualFunctionSize = vtableSize,
                 Fields = ProcessFields(fields),
                 VirtualFunctions = virtualFunctions,
                 MemberFunctions = memberFunctionsArray,
@@ -686,6 +715,7 @@ public class ProcessedStruct {
     public required string StructNamespace;
     public required int StructSize;
     public required ProcessedField[] Fields;
+    public required int VirtualFunctionSize;
     public ProcessedVirtualFunction[]? VirtualFunctions; // null if there are no virtual functions, empty if there's a vtable with unknown contents
     public required ProcessedMemberFunction[] MemberFunctions;
     public ProcessedMemberFunction[]? StaticMemberFunctions;
@@ -863,6 +893,10 @@ public class ProcessedStructConverter : IYamlTypeConverter {
             ProcessedFieldConverter.Instance.WriteYaml(emitter, field, field.GetType());
         }
         emitter.Emit(new SequenceEnd());
+        if (s.VirtualFunctionSize != 0) {
+            emitter.Emit(new Scalar("vtable_size"));
+            emitter.Emit(new Scalar(s.VirtualFunctionSize.ToString()));
+        }
         if (s.VirtualFunctions != null) {
             emitter.Emit(new Scalar("virtual_functions"));
             emitter.Emit(new SequenceStart(null, null, true, SequenceStyle.Block));

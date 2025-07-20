@@ -8,7 +8,7 @@ namespace FFXIVClientStructs.FFXIV.Client.Game.InstanceContent;
 // ctor "E8 ?? ?? ?? ?? C6 83 ?? ?? ?? ?? ?? 48 8D 05 ?? ?? ?? ?? 48 89 03 33 C9"
 [GenerateInterop(isInherited: true)]
 [Inherits<ContentDirector>]
-[StructLayout(LayoutKind.Explicit, Size = 0x11D8)]
+[StructLayout(LayoutKind.Explicit, Size = 0x13D8)]
 public unsafe partial struct PublicContentDirector {
     [FieldOffset(0xD88 + 0x00), CExporterExcelBegin("PublicContent")] public uint NameOffset;
     [FieldOffset(0xD88 + 0x04)] public uint MapIcon;
@@ -54,4 +54,5 @@ public enum PublicContentDirectorType : byte {
     Delubrum = 8,
     IslandSanctuary = 9,
     FallGuys = 10,
+    OccultCrescent = 11,
 }
