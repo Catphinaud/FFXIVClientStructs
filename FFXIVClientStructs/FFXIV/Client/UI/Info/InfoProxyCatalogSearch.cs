@@ -11,7 +11,7 @@ namespace FFXIVClientStructs.FFXIV.Client.UI.Info;
 [StructLayout(LayoutKind.Explicit, Size = 0x3C8)]
 public unsafe partial struct InfoProxyCatalogSearch {
 
-    // [FieldOffset(0x20)] public byte _unkByte; // 0x14 if searching else 0xA
+    [FieldOffset(0x20)] public byte SearchingMode; // 0x14 if searching else 0xA
     [FieldOffset(0x21)] public byte ItemSearchCategory; // ItemSearchCategory.RowId
     [FieldOffset(0x22)] public bool HasMaxLevelFilter; // If the current category can be filtered by max level
     [FieldOffset(0x23)] public byte MaxLevel; // "Lv." input value, only updated upon actual search
