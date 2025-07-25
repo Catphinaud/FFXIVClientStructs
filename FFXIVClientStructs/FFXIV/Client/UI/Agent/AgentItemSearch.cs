@@ -41,7 +41,7 @@ public unsafe partial struct AgentItemSearch {
     [FieldOffset(0x1A40)] public byte FilteredItemIdIndexCount;
 
     [FieldOffset(0x1A46), FixedSizeArray] internal FixedSizeArray42<ushort> _mainArmsLevel; // Sorted by ClassJob.RowId, for the Main Arms "Lv." input
-    [FieldOffset(0x1A9A)] public ushort SelectedMainArmClassJob; // Main Arm's buttons
+    [FieldOffset(0x1A9A)] public byte SelectedMainArmClassJob; // Main Arm's buttons
     // [FieldOffset(0x1A9C)] public ushort ClassJobCount; // How many ClassJob.RowId there are for the array (somehow 43 but theres only 42 in the array)
 
     // [FieldOffset(0x1AA0), FixedSizeArray] internal FixedSizeArray43<JobDropDownItem> _jobDropdownList;
