@@ -22,9 +22,31 @@ public unsafe partial struct AddonItemSearch {
     [FieldOffset(0x2F00)] public AtkComponentTextInput* SearchTextInput;
     [FieldOffset(0x2F08)] public AtkComponentButton* SearchButton;
 
+    [FieldOffset(0x2F10)] public AtkComponentButton* WishlistButton;
+
+    [FieldOffset(0x2F18)] public AtkComponentNumericInput* ArmsLvInput;
+    [FieldOffset(0x2F20)] public AtkComponentNumericInput* ArmorLvInput;
+    [FieldOffset(0x2F28)] public AtkComponentDropDownList* ArmorJobDropdown;
+
     [FieldOffset(0x2F30)] public AtkComponentList* ResultsList;
 
+    [FieldOffset(0x2F38)] public AtkComponentCheckBox* SortingDropdownCheckbox;
+    [FieldOffset(0x2F40)] public AtkComponentDropDownList* SortingDropdown;
+
+    [FieldOffset(0x2F48)] public AtkTextNode* ResultsMiddleTextNode;
+
+    [FieldOffset(0x2F50)] public AtkComponentButton* NextPageButton;
+    [FieldOffset(0x2F58)] public AtkComponentButton* PreviousPageButton;
+
     [FieldOffset(0x3380)] public AtkComponentCheckBox* PartialSearchCheckBox;
+
+    [FieldOffset(0x3388)] public AtkTextNode* ResultsHeaderTextNode;
+    [FieldOffset(0x3398)] public AtkImageNode* ResultsIconNode;
+    [FieldOffset(0x33A0)] public AtkTextNode* PaginationTextNode;
+
+    [FieldOffset(0x33B0)] public AtkComponentButton* FavoritesButton;
+
+    [FieldOffset(0x33B8)] public AtkComponentCheckBox* FilterUnobtainedCheckbox;
 
     [FieldOffset(0x404B)] public bool PartialMatch;
 
