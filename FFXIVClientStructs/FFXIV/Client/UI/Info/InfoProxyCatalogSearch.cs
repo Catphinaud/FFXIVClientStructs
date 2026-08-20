@@ -31,7 +31,7 @@ public unsafe partial struct InfoProxyCatalogSearch {
     [FieldOffset(0x3B4)] public uint NextPageIndex;
     [FieldOffset(0x3B8)] public uint MaxPerPage;
     [FieldOffset(0x3BC)] public uint IsLoadingWishlist;
-    [FieldOffset(0x3C0)] public byte isPushingItems;
+    [FieldOffset(0x3C0)] public byte IsPushingItems;
 
     [StructLayout(LayoutKind.Explicit, Size = 0x8)]
     public struct Entry {
