@@ -49,7 +49,7 @@ public unsafe partial struct AddonItemSearch {
     [FieldOffset(0x33B8)] public AtkComponentCheckBox* FilterUnobtainedCheckbox;
 
     [FieldOffset(0x404B)] public bool PartialMatch;
-    [FieldOffset(0x404C)] public bool FilterUnobtained;
+    [FieldOffset(0x404C)] public bool CanFilterUnobtained;
 
     [MemberFunction("E8 ?? ?? ?? ?? 48 8D AC 24")]
     public partial void RunSearch(bool ignoreFilters = false);
