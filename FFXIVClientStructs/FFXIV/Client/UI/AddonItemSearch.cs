@@ -11,11 +11,20 @@ namespace FFXIVClientStructs.FFXIV.Client.UI;
 [Inherits<AtkUnitBase>]
 [StructLayout(LayoutKind.Explicit, Size = 0x4050)]
 public unsafe partial struct AddonItemSearch {
+    [FieldOffset(0x238)] public AtkComponentRadioButton* CurrentFilterButton;
+
+    [FieldOffset(0x240)] public AtkCollisionNode* CurrentCollisionNode; // Temporarily added to fix some reversing
+
     [FieldOffset(0x248)] public SearchMode Mode;
     [FieldOffset(0x24C)] public int SelectedFilter;
 
     [FieldOffset(0x250)] public Utf8String SearchText;
     [FieldOffset(0x2B8)] public Utf8String SearchText2;
+
+    [FieldOffset(0x320)] private Utf8String ResultsMiddleText;
+    [FieldOffset(0x388)] private Utf8String SortingTooltip;
+    [FieldOffset(0x3F0)] private Utf8String NextButtonTooltip;
+    [FieldOffset(0x458)] private Utf8String PreviousButtonTooltip;
 
     [FieldOffset(0x4C0), FixedSizeArray] internal FixedSizeArray99<Utf8String> _filterLabels;
 
@@ -50,6 +59,16 @@ public unsafe partial struct AddonItemSearch {
 
     [FieldOffset(0x404B)] public bool PartialMatch;
     [FieldOffset(0x404C)] public bool CanFilterUnobtained;
+
+    /**
+     * @todo Hold onto the way filters are actually set up in
+     * Sig: 48 85 D2 0F 84 ?? ?? ?? ?? 48 8B C4 44 89 48
+     * AddonItemSearch.SetupFilterRadioBoxes(AddonItemSearch* addon, AtkValue* values, int categoryIndex, uint firstNodeId, int lastNodeId, int sheetCategory)
+     *   AddonItemSearch.SetupFilterRadioBoxes(this,values,0,11,43,1);
+     *   AddonItemSearch.SetupFilterRadioBoxes(this,values,1,52,61,2);
+     *   AddonItemSearch.SetupFilterRadioBoxes(this,values,2,71,100,3);
+     *   AddonItemSearch.SetupFilterRadioBoxes(this,values,3,104,123,4);
+     */
 
     [MemberFunction("E8 ?? ?? ?? ?? 48 8D AC 24")]
     public partial void RunSearch(bool ignoreFilters = false);
